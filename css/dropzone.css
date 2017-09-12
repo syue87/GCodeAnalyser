@@ -1,0 +1,12 @@
+#dropzone {
+    border: 3px dashed #cccccc;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    padding: 40px;
+    margin: 5px;
+    text-align: center;
+    font: 20pt bold;
+    color: #909090;
+    transition: border 0.1s ease-in-out
+}
