@@ -459,6 +459,7 @@ function GcodeProcessor() {
         this.absoluteExtrusion = this.settings.absoluteExtrusion;
         var gcodeQueueSize = 100;
         this.gcodes = [];
+        this.retractedLength = 0;
         this.currentCoord = [0, 0, 0, 0];
         this.currentFeedrate = (settings.maxSpeed[0] + settings.maxSpeed[1]) / 2; // Set initial feedrate to avoid problem caused by movement before setting feedrate
         this.currentSpeedFactor = 1;
@@ -601,16 +602,35 @@ function GcodeProcessor() {
                             }
                         }
                     }
-                    extrusions.push([gcode.endCoord.slice(0, 2), gcode.relativeCoord[3], gcode.feedrate, gcode.phaseDistance, [gcode.phaseSpeed[0], gcode.phaseSpeed[1], gcode.phaseSpeed[1], gcode.phaseSpeed[2]]]);
-                    if (gcode.phaseSpeed[1] > maxPrintingSpeed) {
-                        maxPrintingSpeed = gcode.phaseSpeed[1];
-                    }
-                    for (var i = 0; i < 2; i++) {
-                        if (gcode.endCoord[i] > layerMax[i]) {
-                            layerMax[i] = gcode.endCoord[i];
+
+                    extrusionsLength = gcode.relativeCoord[3]
+                    if (this.retractedLength > 0) {
+                        extrusionsLength -= this.retractedLength;
+                        this.retractedLength -= extrusionsLength;
+                        if (this.retractedLength < 0) {
+                            this.retractedLength = 0
                         }
-                        if (gcode.endCoord[i] < layerMin[i]) {
-                            layerMin[i] = gcode.endCoord[i];
+                    }
+
+                    if (extrusionsLength > 0) {
+                        extrusions.push([gcode.endCoord.slice(0, 2), extrusionsLength, gcode.feedrate, gcode.phaseDistance, [gcode.phaseSpeed[0], gcode.phaseSpeed[1], gcode.phaseSpeed[1], gcode.phaseSpeed[2]]]);
+
+                        if (gcode.phaseSpeed[1] > maxPrintingSpeed) {
+                            maxPrintingSpeed = gcode.phaseSpeed[1];
+                        }
+                        for (var i = 0; i < 2; i++) {
+                            if (gcode.endCoord[i] > layerMax[i]) {
+                                layerMax[i] = gcode.endCoord[i];
+                            }
+                            if (gcode.endCoord[i] < layerMin[i]) {
+                                layerMin[i] = gcode.endCoord[i];
+                            }
+                        }
+                    } else {
+                        if (extrusions.length > 0) {
+                            // New Line
+                            layer["e"].push(extrusions);
+                            extrusions = [];
                         }
                     }
                 } else {
@@ -618,6 +638,16 @@ function GcodeProcessor() {
                         // New Line
                         layer["e"].push(extrusions);
                         extrusions = [];
+                    }
+                    if (gcode.isMovement) {
+                        if (gcode.relativeCoord[3] < 0) {
+                            this.retractedLength += gcode.relativeCoord[3]
+                        } else {
+                            this.retractedLength -= gcode.relativeCoord[3]
+                            if (this.retractedLength < 0) {
+                                this.retractedLength = 0
+                            }
+                        }
                     }
                 }
                 layerTime += gcode.phaseTime[0];
@@ -969,12 +999,12 @@ function GcodeProcessor() {
                 break;
             case "M220":
                 if (gcode.parameters.S != undefined) {
-                    this.currentSpeedFactor = gcode.parameters.S;
+                    this.currentSpeedFactor = gcode.parameters.S / 100;
                 }
                 break;
             case "M221":
                 if (gcode.parameters.S != undefined) {
-                    this.currentExtrudeFactor = gcode.parameters.S;
+                    this.currentExtrudeFactor = gcode.parameters.S / 100;
                 }
             default:
                 // unsupported commands
