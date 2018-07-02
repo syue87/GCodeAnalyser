@@ -951,9 +951,11 @@ function GcodeProcessor() {
                 this.calculateBasicMovementInfo(gcode);
                 break;
             case "G90":
+            case "M82":
                 this.absoluteExtrusion = true;
                 break;
             case "G91":
+            case "M83":
                 this.absoluteExtrusion = false;
                 break;
             case "G92":
