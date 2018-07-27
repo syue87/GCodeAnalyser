@@ -274,7 +274,9 @@ Gcode.prototype.calculateTimeByAcceleration = function () {
     this.phaseDistance = [s0 / ratio, s1 / ratio, s2 / ratio];
     if (newStartSpeed != undefined) {
         this.startSpeed = newStartSpeed;
-        this.previousMovementGcode.calculateSpeedByJerk();
+        if (this.previousMovementGcode) {
+            this.previousMovementGcode.calculateSpeedByJerk();
+        }
     }
     if (newEndSpeed != undefined) {
         this.endSpeed = newEndSpeed;
@@ -457,7 +459,6 @@ function GcodeProcessor() {
         this.settings = settings;
         var gcodeIndex = 0;
         this.absoluteExtrusion = this.settings.absoluteExtrusion;
-        var gcodeQueueSize = 100;
         this.gcodes = [];
         this.retractedLength = 0;
         this.currentCoord = [0, 0, 0, 0];
@@ -467,6 +468,7 @@ function GcodeProcessor() {
         this.currentPrintAcceleration = settings.maxPrintAcceleration;
         this.currentTravelAcceleration = settings.maxTravelAcceleration;
         this.movementGcodeCount = 0;
+        this.lookAheadBuffer = settings.lookAheadBuffer;
         this.firmwareRetractLength = settings.firmwareRetractLength;
         this.firmwareUnretractLength = settings.firmwareUnretractLength;
         this.firmwareRetractSpeed = settings.firmwareRetractSpeed * 60;
@@ -563,7 +565,7 @@ function GcodeProcessor() {
 
             }
 
-            if (this.gcodes.length > gcodeQueueSize || "endOfMovementGcode" in calculationGcode) {
+            if (this.gcodes.length > this.lookAheadBuffer || "endOfMovementGcode" in calculationGcode) {
                 if (this.gcodes.length == 0) {
                     break;
                 }

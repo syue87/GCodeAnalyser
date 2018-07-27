@@ -11,7 +11,8 @@ var defaultSettings = {
     "firmwareRetractSpeed": { "discription": "Firmware Retract Speed", "value": [50], "fieldId": ["firmwareRetractSpeed"], "fieldType": "value", "table": undefined, "unit": undefined },
     "firmwareUnretractSpeed": { "discription": "Firmware Un-retract Speed", "value": [50], "fieldId": ["firmwareUnretractSpeed"], "fieldType": "value", "table": undefined, "unit": undefined },
     "firmwareRetractZhop": { "discription": "Firmware Retract Z-Hop", "value": [0], "fieldId": ["firmwareRetractZhop"], "fieldType": "value", "table": undefined, "unit": undefined },
-    "timeScale": { "discription": "Time Scale", "value": [1.01], "fieldId": [undefined], "fieldType": "value", "table": undefined, "unit": undefined, "resetValue": true }
+    "timeScale": { "discription": "Time Scale", "value": [1.01], "fieldId": [undefined], "fieldType": "value", "table": undefined, "unit": undefined, "resetValue": true },
+    "lookAheadBuffer": {"discription": "Look-ahead Buffer Size", "value": [16], "fieldId": ["lookAheadBuffer"], "fieldType": "value", "table": undefined, "unit": undefined }
 }
 
 var globalSettings = {
