@@ -4,6 +4,8 @@ var layers;
 var scale = 1;
 var translate = [0, 0];
 var maxSpeed = 0;
+var renderType = 0;
+var maxFanSpeed = 100;
 var filamentDiameter;
 var currentRender;
 var maxCoord;
@@ -12,18 +14,30 @@ var lastRenderTime;
 var maxRenderDelay = 50;
 var delayWithoutRender;
 
+function setRenderType(newRenderType) {
+    renderType = newRenderType;
+    addSpeedLables();
+    setRender(currentRender);
+}
 
 function addSpeedLables() {
+    if (renderType == 0) {
+        max = maxSpeed;
+        unit = "mm/s";
+    } else if (renderType == 1) {
+        max = maxFanSpeed;
+        unit = "%";
+    }
     var table = document.getElementById("speedLable");
     table.innerHTML = "";
     for (var i = 10; i >= 0; i--) {
-        var speed = Math.floor(maxSpeed * i / (10));
+        var speed = Math.floor(max * i / (10));
         var row = table.insertRow(-1);
         var cell = row.insertCell(-1);
         cell.setAttribute("style", "background-color:" + speedToColor(speed) + ";min-width:30px");
         cell = row.appendChild(document.createElement('th'));
         var span = document.createElement("span");
-        span.innerHTML = speed + "mm/s";
+        span.innerHTML = speed + unit;
         cell.appendChild(span);
     }
 }
@@ -34,7 +48,7 @@ function initCanvas() {
     maxSpeed = 100;
     lastRenderTime = 0;
     delayWithoutRender = 0;
-    addSpeedLables();
+    setRenderType(0);
 }
 
 function resizeCanvas() {
@@ -89,6 +103,7 @@ function initRender(layerDict, filamentD) {
     maxCoord = layerDict.maxCoord;
     minCoord = layerDict.minCoord;
     maxSpeed = layerDict.maxSpeed;
+    maxFanSpeed = layerDict.maxFanSpeed;
     var xScale = canvas.width / (maxCoord[0] - minCoord[0]);
     var yScale = canvas.height / (maxCoord[1] - minCoord[1]);
     if (xScale < yScale) {
@@ -174,6 +189,7 @@ function renderLayer(layerIndex) {
             var endCoord = segment[0];
             var phaseDistance = segment[3];
             var phaseSpeed = segment[4];
+            var fanSpeed = segment[5];
             var length = Math.sqrt((endCoord[0] - startCoord[0]) * (endCoord[0] - startCoord[0]) + (endCoord[1] - startCoord[1]) * (endCoord[1] - startCoord[1]));
             var halfCircleCount = 0;
             if (k == 1) {
@@ -189,13 +205,25 @@ function renderLayer(layerIndex) {
             phaseDistances.push(phaseDistance);
             phaseSpeeds.push(phaseSpeed);
             lengths.push(length);
-            drawCircle(startCoord, extrusionWidth, phaseSpeed[0], angles[k - 1] + Math.PI);
+            if (renderType == 0) {
+                drawCircle(startCoord, extrusionWidth, phaseSpeed[0], angles[k - 1] + Math.PI);
+            } else if (renderType == 1)  {
+                drawCircle(startCoord, extrusionWidth, fanSpeed, angles[k - 1] + Math.PI);
+            }
         }
         for (var k = 0; k < segments.length - 1; k++) {
-            drawCircle(endCoords[k], extrusionWidths[k], phaseSpeeds[k][3], angles[k]);
+            if (renderType == 0) {
+                drawCircle(endCoords[k], extrusionWidths[k], phaseSpeeds[k][3], angles[k]);
+            } else if (renderType == 1) {
+                drawCircle(endCoords[k], extrusionWidths[k], fanSpeed, angles[k]);
+            }
         }
         for (var k = 0; k < segments.length - 1; k++) {
-            drawExtrusion(startCoords[k], endCoords[k], phaseDistances[k], phaseSpeeds[k], extrusionWidths[k], lengths[k], angles[k]);
+            if (renderType == 0) {
+                drawExtrusion(startCoords[k], endCoords[k], phaseDistances[k], phaseSpeeds[k], extrusionWidths[k], lengths[k], angles[k]);
+            } else if (renderType == 1) {
+                drawExtrusion(startCoords[k], endCoords[k], phaseDistances[k], [fanSpeed, fanSpeed, fanSpeed, fanSpeed], extrusionWidths[k], lengths[k], angles[k]);
+            }
         }
     }
 }
@@ -291,16 +319,23 @@ function drawLine(fromCoord, toCoord, width, colorStopLocations, colorStopSpeeds
 }
 
 function speedToColor(speed) {
+    if (renderType == 0) {
+        max = maxSpeed;
+        unit = "mm/s";
+    } else if (renderType == 1) {
+        max = maxFanSpeed;
+        unit = "%";
+    }
     var red, green, blue;
-    if (speed >= 0 && speed <= maxSpeed / 2) {
+    if (speed >= 0 && speed <= max / 2) {
         // interpolate between (1.0f, 0.0f, 0.0f) and (0.0f, 1.0f, 0.0f)
-        green = speed / (maxSpeed / 2);
+        green = speed / (max / 2);
         blue = 1 - green;
         red = 0;
-    } else if (speed > maxSpeed / 2 && speed <= maxSpeed) {
+    } else if (speed > max / 2 && speed <= max) {
         // interpolate between (0.0f, 1.0f, 0.0f) and (0.0f, 0.0f, 1.0f)
         blue = 0;
-        red = (speed - maxSpeed / 2) / (maxSpeed / 2);
+        red = (speed - max / 2) / (max / 2);
         green = 1 - red;
     }
     return "rgb(" + Math.floor(red * 255) + "," + Math.floor(green * 255) + "," + Math.floor(blue * 255) + ")";

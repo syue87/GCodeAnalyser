@@ -1,6 +1,7 @@
-var gcodeProcessorWorker = new Worker('js/gcodeProcessor.js?1807260');
+var gcodeProcessorWorker = new Worker('js/gcodeProcessor.js?1807262');
 var gcodeLines = undefined;
 var selectedSettings = 0;
+var renderType = 0;
 var results = Array(4);
 var resultFieldIds = [];
 var currentCalculationSetting = 0;
@@ -17,15 +18,8 @@ dropzone.onmouseout = function () {
 makeDroppable(document.getElementById("importSettingsButton"), readSettings);
 
 $(document).ready(function () {
-  $('#viewerHelp').popover({
-    content: "&#8226 Make sure <b>Extrusion Mode</b> is selected correctly <br /> &#8226 <b>Filament Diameter</b> will affect line width",
-    html: true
-  });
-});
-
-$(document).ready(function () {
   $('#whatsnew').popover({
-    content: "&#8226 Added setting to account for speed optimizaion limitation caused by firmware lookahead buffer size. <br /> The default buffer size for marlin is 16.",
+    content: "&#8226 Added fan speed color visualization in viewer. <br /> &#8226 Added setting to account for speed optimizaion limitation caused by firmware lookahead buffer size. <br /> The default buffer size for marlin is 16.",
     html: true
   });
 });
@@ -141,6 +135,13 @@ function selectSettings(newSelectedSettings) {
   displaySettings();
   displayResult();
   drawHistogram();
+}
+
+function selectRenderType(newRenderType) {
+  document.getElementById("selectRender" + renderType).className = "btn btn-primary";
+  document.getElementById("selectRender" + newRenderType).className = "btn btn-primary active";
+  renderType = newRenderType;
+  setRenderType(renderType);
 }
 
 function displayProgressBar() {

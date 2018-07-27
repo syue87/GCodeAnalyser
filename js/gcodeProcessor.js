@@ -462,12 +462,14 @@ function GcodeProcessor() {
         this.gcodes = [];
         this.retractedLength = 0;
         this.currentCoord = [0, 0, 0, 0];
+        this.currentFanSpeed = 0;
         this.currentFeedrate = (settings.maxSpeed[0] + settings.maxSpeed[1]) / 2; // Set initial feedrate to avoid problem caused by movement before setting feedrate
         this.currentSpeedFactor = 1;
         this.currentExtrudeFactor = 1;
         this.currentPrintAcceleration = settings.maxPrintAcceleration;
         this.currentTravelAcceleration = settings.maxTravelAcceleration;
         this.movementGcodeCount = 0;
+        this.maxFanSpeed = 0;
         this.lookAheadBuffer = settings.lookAheadBuffer;
         this.firmwareRetractLength = settings.firmwareRetractLength;
         this.firmwareUnretractLength = settings.firmwareUnretractLength;
@@ -615,7 +617,7 @@ function GcodeProcessor() {
                     }
 
                     if (extrusionsLength > 0) {
-                        extrusions.push([gcode.endCoord.slice(0, 2), extrusionsLength, gcode.feedrate, gcode.phaseDistance, [gcode.phaseSpeed[0], gcode.phaseSpeed[1], gcode.phaseSpeed[1], gcode.phaseSpeed[2]]]);
+                        extrusions.push([gcode.endCoord.slice(0, 2), extrusionsLength, gcode.feedrate, gcode.phaseDistance, [gcode.phaseSpeed[0], gcode.phaseSpeed[1], gcode.phaseSpeed[1], gcode.phaseSpeed[2]], this.currentFanSpeed]);
 
                         if (gcode.phaseSpeed[1] > maxPrintingSpeed) {
                             maxPrintingSpeed = gcode.phaseSpeed[1];
@@ -806,7 +808,7 @@ function GcodeProcessor() {
         var maxCoord = [layerMaxs[0][indexForMax], layerMaxs[1][indexForMax]];
         var minCoord = [layerMins[0][indexForMax], layerMins[1][indexForMax]];
         postMessage({ "complete": true });
-        postMessage({ "layers": { "layers": layers, "maxSpeed": maxPrintingSpeed, "maxCoord": maxCoord, "minCoord": minCoord } });
+        postMessage({ "layers": { "layers": layers, "maxSpeed": maxPrintingSpeed, "maxCoord": maxCoord, "minCoord": minCoord, "maxFanSpeed": this.maxFanSpeed} });
         layers = undefined;
         layerMaxs = undefined;
         layerMins = undefined;
@@ -957,6 +959,19 @@ function GcodeProcessor() {
                 break;
             case "M83":
                 this.absoluteExtrusion = false;
+                break;
+            case "M106":
+                if (gcode.parameters["S"] <= 1) {
+                    this.currentFanSpeed = gcode.parameters["S"] * 100;
+                } else {
+                    this.currentFanSpeed = gcode.parameters["S"] / 2.55;
+                }
+                if (this.currentFanSpeed > this.maxFanSpeed) {
+                    this.maxFanSpeed = this.currentFanSpeed
+                }
+                break;
+            case "M107":
+                this.currentFanSpeed = 0;
                 break;
             case "G92":
                 this.currentCoord = updatedValueInNewArray(this.currentCoord, gcode.coord);
