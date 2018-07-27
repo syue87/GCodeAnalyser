@@ -110,6 +110,18 @@
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th>
+                                        Look-ahead Buffer Size
+                                    </th>
+                                    <td>
+                                        <div class="input-group">
+                                            <input type="number" id="lookAheadBuffer" class="form-control" onchange="saveSettings(event)" title="Number of gcode command to look-ahead for speed optimization. Set it to match your firmware for best estmaition accuracy. Marlin uses 16 by default."
+                                                data-min="2" min="2" step="1">
+                                            <span class="input-group-addon"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <b>Firmware Retraction Settings</b><br>(if firmware retraction is used)
                                     </td>
@@ -306,7 +318,9 @@
         <div class="container-fluid">
             <div class="row" align="center">
                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" align="left">
-                    <span class="text-muted">Last Update: 2018-01-22</span>
+                    <span class="text-muted">Last Update: 2018-07-26</span>
+                    <span style="color:skyblue" id="whatsnew" data-toggle="popover" data-trigger="hover" data-placement="top">What's new?</span>
+                    <a href="https://github.com/syue87/GCodeAnalyser/wiki/Gcode-Analyser-V2-feature-planning">Version 2 is planned</a>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" align="right">
                     <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
@@ -324,7 +338,7 @@
 </body>
 <script type="text/javascript" src="js/histogram.js?1707110"></script>
 <script type="text/javascript" src="js/render.js?1707171"></script>
-<script type="text/javascript" src="js/gcodeAnalyser.js?1801221"></script>
-<script type="text/javascript" src="js/settings.js?1707260"></script>
+<script type="text/javascript" src="js/gcodeAnalyser.js?1807260"></script>
+<script type="text/javascript" src="js/settings.js?1807260"></script>
 
 </html>
