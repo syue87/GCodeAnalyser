@@ -48,7 +48,7 @@ function initCanvas() {
     maxSpeed = 100;
     lastRenderTime = 0;
     delayWithoutRender = 0;
-    setRenderType(0);
+    addSpeedLables();
 }
 
 function resizeCanvas() {
