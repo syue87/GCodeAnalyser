@@ -240,8 +240,11 @@
                             <span>Viewer</span>
                             <span id="layerNumber" style="color:skyblue"></span>
                         </div>
-                        <div style="color:#337ab7">
-                            <span style="color:skyblue" id="viewerHelp" data-toggle="popover" data-trigger="hover" data-placement="bottom">(Doesn't look right?)</span>
+                        <div class="btn-group" data-toggle="buttons">
+                            <a href="#" class="btn btn-primary active" title="Move Speed" id="selectRender0"
+                                onclick="selectRenderType(0)">Move Speed</a>
+                            <a href="#" class="btn btn-primary" title="Fan Speed" id="selectRender1"
+                                onclick="selectRenderType(1)">Fan Speed</a>
                         </div>
                     </div>
                     <div class="panel-collapse collapse in" style="background:#ddd">
@@ -337,8 +340,8 @@
     </footer>
 </body>
 <script type="text/javascript" src="js/histogram.js?1707110"></script>
-<script type="text/javascript" src="js/render.js?1707171"></script>
-<script type="text/javascript" src="js/gcodeAnalyser.js?1807260"></script>
+<script type="text/javascript" src="js/render.js?1807262"></script>
+<script type="text/javascript" src="js/gcodeAnalyser.js?1807263"></script>
 <script type="text/javascript" src="js/settings.js?1807260"></script>
 
 </html>
