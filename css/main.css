@@ -1,0 +1,73 @@
+#dropzone {
+    border: 3px dashed #cccccc;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    padding: 40px;
+    margin: 5px;
+    text-align: center;
+    font: 20pt bold;
+    color: #909090;
+    transition: border 0.1s ease-in-out
+}
+
+.navbar-brand {
+    transform: translateX(-50%);
+    left: 50%;
+}
+
+#bodyDiv {
+    margin-bottom: 40px;
+}
+
+.panelDiv {
+    max-width: 1300px;
+    margin: 0 auto;
+    float: none;
+}
+
+.showhide {
+    color:skyblue;
+    float: right;
+}
+
+#retractionTable {
+    margin-bottom: 0px;
+}
+
+.marbot20 {
+    margin-bottom: 20px;
+}
+
+#layerNumber {
+    color:skyblue;
+}
+
+#speedLable {
+    margin: 1px;
+}
+
+#scroll {
+    color:Gray;
+}
+
+#canvasVerticalSlider {
+    float: right;
+    margin: 10px;
+}
+
+#canvasDiv {
+    background:#ddd;
+}
+
+#progressBar {
+    width:0%;
+}
+
+#whatsnew {
+    color:skyblue;
+}
+
+#patip {
+    color:skyblue;
+}
