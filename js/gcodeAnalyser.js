@@ -1,4 +1,4 @@
-var gcodeProcessorWorker = new Worker('js/gcodeProcessor.js?1807262');
+var gcodeProcessorWorker = new Worker('js/gcodeProcessor.js?1811111');
 var gcodeLines = undefined;
 var selectedSettings = 0;
 var renderType = 0;
@@ -19,7 +19,7 @@ makeDroppable(document.getElementById("importSettingsButton"), readSettings);
 
 $(document).ready(function () {
   $('#whatsnew').popover({
-    content: "&#8226 Added fan speed color visualization in viewer. <br /> &#8226 Added setting to account for speed optimizaion limitation caused by firmware lookahead buffer size. <br /> The default buffer size for marlin is 16.",
+    content: "&#8226 Added support for M203 M205 M566 gcode. <br /> By now all of \"Printer Attribut\" settings can be updated on the fly. <br /> &#8226 Add filament usage display in cm^3 <br /> &#8226 Added fan speed color visualization in viewer. <br /> &#8226 Added setting to account for speed optimizaion limitation caused by firmware lookahead buffer size. <br /> The default buffer size for marlin is 16.",
     html: true
   });
 });

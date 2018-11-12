@@ -85,6 +85,7 @@ Gcode.prototype.indexForAccelerationCalculation = undefined;
 Gcode.prototype.limitedByMaxSpeed = undefined;
 Gcode.prototype.maxAcceleration = undefined;
 Gcode.prototype.maxJerk = undefined;
+Gcode.prototype.maxSpeed = undefined;
 Gcode.prototype.movementGcodeIndex = undefined;
 Gcode.prototype.nextMovementGcode = undefined;
 Gcode.prototype.parameters = undefined;
@@ -468,6 +469,8 @@ function GcodeProcessor() {
         this.currentExtrudeFactor = 1;
         this.currentPrintAcceleration = settings.maxPrintAcceleration;
         this.currentTravelAcceleration = settings.maxTravelAcceleration;
+        this.currentMaxJerk = settings.maxJerk;
+        this.currentMaxSpeed = settings.maxSpeed;
         this.movementGcodeCount = 0;
         this.maxFanSpeed = 0;
         this.lookAheadBuffer = settings.lookAheadBuffer;
@@ -763,7 +766,7 @@ function GcodeProcessor() {
         result["zHopTime"] = secondsToHMS(zHopTime);
         result["retractCount"] = Math.floor(retractCount);
         result["retractTime"] = secondsToHMS(retractTime);
-        result["filamentUsage"] = (filamentUsage / 1000).toFixed(2) + " m";
+        result["filamentUsage"] = (filamentUsage / 1000).toFixed(2) + " m, " + (filamentUsage * Math.PI * Math.pow(this.settings.filamentDiameter / 2, 2) / 1000).toFixed(2) + " cm^3";
         result["xyFeedrate"] = (xyFeedrateMin * 60).toFixed(0) + " (" + xyFeedrateMin.toFixed(2) + "mm/s) / " + (xyFeedrateMax * 60).toFixed(0) + " (" + xyFeedrateMax.toFixed(2) + "mm/s)";
         result["filamentUsageRate"] = (filamentUsage / totalTime).toFixed(2) + " mm/s, " + (filamentUsage / 10 / totalTime * 60).toFixed(2) + " cm/min";
         result["filamentLineRatio"] = (printDistance / filamentUsage).toFixed(2) + " mm";
@@ -808,7 +811,7 @@ function GcodeProcessor() {
         var maxCoord = [layerMaxs[0][indexForMax], layerMaxs[1][indexForMax]];
         var minCoord = [layerMins[0][indexForMax], layerMins[1][indexForMax]];
         postMessage({ "complete": true });
-        postMessage({ "layers": { "layers": layers, "maxSpeed": maxPrintingSpeed, "maxCoord": maxCoord, "minCoord": minCoord, "maxFanSpeed": this.maxFanSpeed} });
+        postMessage({ "layers": { "layers": layers, "maxSpeed": maxPrintingSpeed, "maxCoord": maxCoord, "minCoord": minCoord, "maxFanSpeed": this.maxFanSpeed } });
         layers = undefined;
         layerMaxs = undefined;
         layerMins = undefined;
@@ -911,13 +914,13 @@ function GcodeProcessor() {
 
             // Speed, acceleration and jerk
             gcode.calculateAxisRatio();
-            gcode.calculateSpeed(this.settings.maxSpeed);
+            gcode.calculateSpeed(this.currentMaxSpeed);
             if (gcode.printMove) {
                 gcode.calculateAcceleration(this.currentPrintAcceleration);
             } else {
                 gcode.calculateAcceleration(this.currentTravelAcceleration);
             }
-            gcode.maxJerk = this.settings.maxJerk;
+            gcode.maxJerk = this.currentMaxJerk;
         }
     }
 
@@ -981,6 +984,28 @@ function GcodeProcessor() {
                 break;
             case "M202":
                 this.currentTravelAcceleration = updatedValueInNewArray(this.currentTravelAcceleration, gcode.coord);
+                break;
+            case "M203":
+                var mmsec;
+                if (gcode.coord) {
+                    if (gcode.coord[0] && gcode.coord[0] > 600 || gcode.coord[1] && gcode.coord[1] > 600) { //mm/min
+                        mmsec = scaleValues(1 / 60, gcode.coord);
+                    } else { //mm/sec
+                        mmsec = gcode.coord;
+                    }
+                    this.currentMaxSpeed = updatedValueInNewArray(this.currentMaxSpeed, mmsec);
+                }
+                break;
+            case "M205":
+                var mmsec;
+                if (gcode.coord) {
+                    if (gcode.coord[0] && gcode.coord[0] > 60 || gcode.coord[1] && gcode.coord[1] > 60) { //mm/min
+                        mmsec = scaleValues(1 / 60, gcode.coord);
+                    } else { //mm/sec
+                        mmsec = gcode.coord;
+                    }
+                    this.currentMaxJerk = updatedValueInNewArray(this.currentMaxJerk, mmsec);
+                }
                 break;
             case "M207":
                 if (gcode.parameters.S != undefined) {
