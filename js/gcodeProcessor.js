@@ -479,7 +479,6 @@ function GcodeProcessor() {
         this.firmwareRetractSpeed = settings.firmwareRetractSpeed * 60;
         this.firmwareUnretractSpeed = settings.firmwareUnretractSpeed * 60;
         this.firmwareRetractZhop = settings.firmwareRetractZhop;
-        this.zBeforeFirmwareRetractZhop = 0;
         var headGcode = new Gcode();
         var tailGcode = new Gcode();
         headGcode.endSpeed = [0, 0, 0, 0];
@@ -935,7 +934,6 @@ function GcodeProcessor() {
                     gcode.parameters = {};
                     gcode.parameters["F"] = this.firmwareRetractSpeed;
                     gcode.coord = this.currentCoord.slice();
-                    this.zBeforeFirmwareRetractZhop = gcode.coord[2];
                     gcode.coord[2] += this.firmwareRetractZhop;
                     if (this.absoluteExtrusion) {
                         gcode.coord[3] -= this.firmwareRetractLength;
@@ -949,7 +947,7 @@ function GcodeProcessor() {
                 gcode.parameters = {};
                 gcode.parameters["F"] = this.firmwareUnretractSpeed;
                 gcode.coord = this.currentCoord.slice();
-                gcode.coord[2] = this.zBeforeFirmwareRetractZhop;
+                gcode.coord[2] -= this.firmwareRetractZhop;
                 if (this.absoluteExtrusion) {
                     gcode.coord[3] += this.firmwareUnretractLength;
                 } else {
